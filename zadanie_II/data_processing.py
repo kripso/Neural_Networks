@@ -1,0 +1,100 @@
+import os
+import numpy as np
+import cv2
+import imutils
+import matplotlib.pyplot as plt
+
+def imshow(image):
+    plt.figure(figsize=(15, 10))
+    plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+def load_images(path):
+    X = []
+    y = []
+    curr_y = 0
+
+    # read all entities in data folder
+    for entity in os.listdir(path):
+        images_path = os.path.join(path, entity)
+
+        # read all the images of each entity
+        for filename in os.listdir(images_path):
+            image_path = os.path.join(images_path, filename)
+            image = cv2.imread(image_path, 0)
+            X.append(image)
+            y.append(curr_y)
+                 
+        curr_y += 1
+    
+    y = np.vstack(y)
+    X = np.stack(X)
+
+    return X, y.ravel()
+
+def make_pairs(images, labels):
+	# initialize two empty lists to hold the (image, image) pairs and
+	# labels to indicate if a pair is positive or negative
+	pair_images = []
+	pair_labels = []
+	
+	numClasses = len(np.unique(labels))
+	# create list of arrays with same label
+	pos_label_list = [np.where(labels == i)[0] for i in range(0, numClasses)]
+
+	# loop over all images
+	for image in range(len(images)):
+		currentImage = images[image]
+		label = labels[image]
+
+		"""
+		positive pair
+		"""
+		# take random image of same label
+		image_pos = images[np.random.choice(pos_label_list[label])]
+
+		# append positive pair and update label to 1
+		pair_images.append([currentImage, image_pos])
+		pair_labels.append([1])
+
+		"""
+		negative pair
+		"""
+		neg_label_list = np.where(labels != label)[0]
+		image_neg = images[np.random.choice(neg_label_list)]
+
+		# append negative pair and update label to 0
+		pair_images.append([currentImage, image_neg])
+		pair_labels.append([0])
+
+	return (np.array(pair_images), np.array(pair_labels))
+
+def stack_pairs(pairTrain, labelTrain):
+    images = []
+
+    for i in np.random.choice(np.arange(0, len(pairTrain)), size=(49,)):
+        # grab the current image pair and label
+        imageA = pairTrain[i][0]
+        imageB = pairTrain[i][1]
+        label = labelTrain[i]
+
+        padding = 4
+        w, h = imageA.shape
+
+        output = np.zeros((w+2*padding, 2*w+padding), dtype="uint8")
+        pair = np.hstack([imageA, imageB])
+        output[padding:w+padding, 0:2*w] = pair
+
+        text = "-" if label[0] == 0 else "+"
+        color = (0, 0, 255) if label[0] == 0 else (0, 255, 0)
+
+        # create a 3-channel RGB image from the grayscale pair,
+        vis = cv2.merge([output] * 3)
+        cv2.putText(vis, text, (4, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.2,
+            color, 3)
+        images.append(vis)
+    
+    return images
+
+def pairs_montage(X_train, y_train):
+    montage = imutils.build_montages(stack_pairs(X_train, y_train), (192, 102), (7, 7))[0]
+    imshow(montage)
