@@ -3,10 +3,20 @@ import numpy as np
 import cv2
 import imutils
 import matplotlib.pyplot as plt
+import sys
 
 def imshow(image):
     plt.figure(figsize=(15, 10))
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+
+def read_imgs_from_dir(path_to_dir):
+    images = []
+    for filename in os.listdir(path_to_dir):
+        image_path = os.path.join(path_to_dir, filename)
+        image = cv2.imread(image_path, 0)
+        images.append(image)
+
+    return images
 
 def load_images(path):
     X = []
@@ -98,3 +108,35 @@ def stack_pairs(pairTrain, labelTrain):
 def pairs_montage(X_train, y_train):
     montage = imutils.build_montages(stack_pairs(X_train, y_train), (192, 102), (7, 7))[0]
     imshow(montage)
+
+def draw_evaluation(sample, s_class, similarity):
+    plt.figure(figsize=(4, 6))
+    plt.title("Similarity: {:.2f}".format(similarity))
+    pair = np.hstack((sample, s_class))
+    plt.imshow(pair, cmap=plt.cm.gray)
+
+def evaluate_data(model, path_classes, path_to_sample):
+    # read sample
+    sample = image = cv2.imread(path_to_sample, 0)
+    if sample is None:
+        sys.exit("Could not read the image.")
+
+    sample_orig = sample.copy()
+
+    # expand image dimensions, add 1 channel and batch dimension
+    sample = np.expand_dims(sample, axis=-1)
+    sample = np.expand_dims(sample, axis=0)
+
+    # read classes we will compare our sample to
+    classes = read_imgs_from_dir(path_classes)
+
+    for single_class in classes:
+        single_class_orig = single_class.copy()
+
+        single_class = np.expand_dims(single_class, axis=-1)
+        single_class = np.expand_dims(single_class, axis=0)
+
+        # evaluate similarity
+        prediction = model.predict([sample, single_class])
+        similarity = prediction[0][0]
+        draw_evaluation(sample_orig, single_class_orig, similarity)
