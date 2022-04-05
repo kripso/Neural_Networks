@@ -8,6 +8,7 @@ import sys
 def imshow(image):
     plt.figure(figsize=(15, 10))
     plt.imshow(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+    plt.show()
 
 def read_imgs_from_dir(path_to_dir):
     images = []
@@ -114,6 +115,7 @@ def draw_evaluation(sample, s_class, similarity):
     plt.title("Similarity: {:.2f}".format(similarity))
     pair = np.hstack((sample, s_class))
     plt.imshow(pair, cmap=plt.cm.gray)
+    plt.show()
 
 def evaluate_data(model, path_classes, path_to_sample):
     # read sample
@@ -140,3 +142,4 @@ def evaluate_data(model, path_classes, path_to_sample):
         prediction = model.predict([sample, single_class])
         similarity = prediction[0][0]
         draw_evaluation(sample_orig, single_class_orig, similarity)
+        print(similarity )

@@ -1,0 +1,7 @@
+tensorflow
+keras
+imutils
+opencv-python
+PyYAML
+matplotlib
+ipykernel
