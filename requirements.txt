@@ -5,3 +5,4 @@ opencv-python
 PyYAML
 matplotlib
 ipykernel
+tensorflow_addons
