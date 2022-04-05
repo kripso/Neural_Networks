@@ -9,7 +9,7 @@ CONFIG:
   VALIDATION_SPLIT: 0.1
 
 PATHS:
-  BASE_PATH: "data/characters/"
+  BASE_PATH: "data/faces/"
   TEST_CLASSES: "test/classes/"
   TEST_SAMPLES: "test/samples/"
   MODEL_PATH: "model/siamese_model/"
