@@ -4,6 +4,7 @@ import cv2
 import imutils
 import matplotlib.pyplot as plt
 import sys
+import random
 
 def imshow(image):
     plt.figure(figsize=(15, 10))
@@ -42,13 +43,14 @@ def load_images(path):
 
     return X, y.ravel()
 
-def make_pairs(images, labels):
+def make_pairs(images, labels, negatives=8):
 	# initialize two empty lists to hold the (image, image) pairs and
 	# labels to indicate if a pair is positive or negative
 	pair_images = []
 	pair_labels = []
 	
 	numClasses = len(np.unique(labels))
+
 	# create list of arrays with same label
 	pos_label_list = [np.where(labels == i)[0] for i in range(0, numClasses)]
 
@@ -60,22 +62,26 @@ def make_pairs(images, labels):
 		"""
 		positive pair
 		"""
-		# take random image of same label
-		image_pos = images[np.random.choice(pos_label_list[label])]
+		# take all images with same label
+		for same_label in pos_label_list[label]:
+			image_pos = images[same_label]
 
-		# append positive pair and update label to 1
-		pair_images.append([currentImage, image_pos])
-		pair_labels.append([1])
+			# append positive pair and update label to 1
+			pair_images.append([currentImage, image_pos])
+			pair_labels.append([1])
 
 		"""
 		negative pair
 		"""
 		neg_label_list = np.where(labels != label)[0]
-		image_neg = images[np.random.choice(neg_label_list)]
+		diff_labels = random.choices(neg_label_list, k=negatives) 
+		
+		for diff_label in diff_labels:
+			image_neg = images[diff_label]
 
-		# append negative pair and update label to 0
-		pair_images.append([currentImage, image_neg])
-		pair_labels.append([0])
+			# append negative pair and update label to 0
+			pair_images.append([currentImage, image_neg])
+			pair_labels.append([0])
 
 	return (np.array(pair_images), np.array(pair_labels))
 
@@ -142,4 +148,16 @@ def evaluate_data(model, path_classes, path_to_sample):
         prediction = model.predict([sample, single_class])
         similarity = prediction[0][0]
         draw_evaluation(sample_orig, single_class_orig, similarity)
-        print(similarity )
+        print(similarity)
+
+def show_positive_train(pairs, labels, marker):
+    num_labels = len(labels)
+    counter = 0
+    for i in range(num_labels):
+        if labels[i] == marker:
+            pair = np.hstack((pairs[i][0], pairs[i][1]))
+
+            counter += 1
+            plt.figure(figsize=(4, 6))
+            plt.title(f"{counter}.")
+            plt.imshow(pair, cmap=plt.cm.gray)
