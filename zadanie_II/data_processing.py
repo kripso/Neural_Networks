@@ -77,6 +77,7 @@ def make_pairs(images, labels, negatives=8):
 		diff_labels = random.choices(neg_label_list, k=negatives) 
 		
 		for diff_label in diff_labels:
+
 			image_neg = images[diff_label]
 
 			# append negative pair and update label to 0
@@ -121,7 +122,7 @@ def draw_evaluation(sample, s_class, similarity):
     plt.title("Similarity: {:.2f}".format(similarity))
     pair = np.hstack((sample, s_class))
     plt.imshow(pair, cmap=plt.cm.gray)
-    plt.show()
+    # plt.show()
 
 def evaluate_data(model, path_classes, path_to_sample):
     # read sample
@@ -150,8 +151,9 @@ def evaluate_data(model, path_classes, path_to_sample):
         draw_evaluation(sample_orig, single_class_orig, similarity)
         print(similarity)
 
-def show_positive_train(pairs, labels, marker):
+def show_positive_train(pairs, labels, marker, limit):
     num_labels = len(labels)
+    
     counter = 0
     for i in range(num_labels):
         if labels[i] == marker:
@@ -161,3 +163,6 @@ def show_positive_train(pairs, labels, marker):
             plt.figure(figsize=(4, 6))
             plt.title(f"{counter}.")
             plt.imshow(pair, cmap=plt.cm.gray)
+        
+        if counter > limit:
+            break
