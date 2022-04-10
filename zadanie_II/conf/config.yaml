@@ -1,7 +1,7 @@
 CONFIG:
   IMG_SHAPE:
-    - 105
-    - 105
+    - 92
+    - 112
     - 1
   BATCH_SIZE: 63
   EPOCHS: 100
