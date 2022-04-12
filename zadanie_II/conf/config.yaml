@@ -1,6 +1,6 @@
 CONFIG:
   IMG_SHAPE:
-    - 92
+    - 112
     - 112
     - 1
   BATCH_SIZE: 63
