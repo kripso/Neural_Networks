@@ -44,47 +44,48 @@ def load_images(path):
     return X, y.ravel()
 
 def make_pairs(images, labels, negatives=8):
-	# initialize two empty lists to hold the (image, image) pairs and
-	# labels to indicate if a pair is positive or negative
-	pair_images = []
-	pair_labels = []
-	
-	numClasses = len(np.unique(labels))
+    # initialize two empty lists to hold the (image, image) pairs and
+    # labels to indicate if a pair is positive or negative
+    pair_images = []
+    pair_labels = []
 
-	# create list of arrays with same label
-	pos_label_list = [np.where(labels == i)[0] for i in range(0, numClasses)]
+    # numClasses = len(np.unique(labels))
+    num_classes = max(labels) + 1
 
-	# loop over all images
-	for image in range(len(images)):
-		currentImage = images[image]
-		label = labels[image]
+    # create list of arrays with same label
+    pos_label_list = [np.where(labels == i)[0] for i in range(0, num_classes)]
 
-		"""
-		positive pair
-		"""
-		# take all images with same label
-		for same_label in pos_label_list[label]:
-			image_pos = images[same_label]
+    # loop over all images
+    for image in range(len(images)):
+        currentImage = images[image]
+        label = labels[image]
 
-			# append positive pair and update label to 1
-			pair_images.append([currentImage, image_pos])
-			pair_labels.append([1])
+        """
+        positive pair
+        """
+        # take all images with same label
+        for same_label in pos_label_list[label]:
+            image_pos = images[same_label]
 
-		"""
-		negative pair
-		"""
-		neg_label_list = np.where(labels != label)[0]
-		diff_labels = random.choices(neg_label_list, k=negatives) 
-		
-		for diff_label in diff_labels:
+            # append positive pair and update label to 1
+            pair_images.append([currentImage, image_pos])
+            pair_labels.append([1])
 
-			image_neg = images[diff_label]
+        """
+        negative pair
+        """
+        neg_label_list = np.where(labels != label)[0]
+        diff_labels = random.choices(neg_label_list, k=negatives) 
+        
+        for diff_label in diff_labels:
 
-			# append negative pair and update label to 0
-			pair_images.append([currentImage, image_neg])
-			pair_labels.append([0])
+            image_neg = images[diff_label]
 
-	return (np.array(pair_images), np.array(pair_labels))
+            # append negative pair and update label to 0
+            pair_images.append([currentImage, image_neg])
+            pair_labels.append([0])
+
+    return (np.array(pair_images), np.array(pair_labels))
 
 def stack_pairs(pairTrain, labelTrain):
     images = []
