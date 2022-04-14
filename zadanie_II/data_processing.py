@@ -55,10 +55,11 @@ def make_pairs(images, labels, negatives=8):
     pair_images = []
     pair_labels = []
 
-    numClasses = len(np.unique(labels))
+    # numClasses = len(np.unique(labels))
+    num_classes = max(labels) + 1
 
     # create list of arrays with same label
-    pos_label_list = [np.where(labels == i)[0] for i in range(0, numClasses)]
+    pos_label_list = [np.where(labels == i)[0] for i in range(0, num_classes)]
 
     # loop over all images
     for image in range(len(images)):
@@ -66,8 +67,8 @@ def make_pairs(images, labels, negatives=8):
         label = labels[image]
 
         """
-		positive pair
-		"""
+        positive pair
+        """
         # take all images with same label
         for same_label in pos_label_list[label]:
             image_pos = images[same_label]
@@ -77,12 +78,13 @@ def make_pairs(images, labels, negatives=8):
             pair_labels.append([1])
 
         """
-		negative pair
-		"""
+        negative pair
+        """
         neg_label_list = np.where(labels != label)[0]
-        diff_labels = random.choices(neg_label_list, k=negatives)
-
+        diff_labels = random.choices(neg_label_list, k=negatives) 
+        
         for diff_label in diff_labels:
+
             image_neg = images[diff_label]
 
             # append negative pair and update label to 0
@@ -90,7 +92,6 @@ def make_pairs(images, labels, negatives=8):
             pair_labels.append([0])
 
     return (np.array(pair_images), np.array(pair_labels))
-
 
 def stack_pairs(pairTrain, labelTrain):
     images = []
@@ -130,7 +131,7 @@ def draw_evaluation(sample, s_class, similarity):
     plt.title("Similarity: {:.2f}".format(similarity))
     pair = np.hstack((sample, s_class))
     plt.imshow(pair, cmap=plt.cm.gray)
-    plt.show()
+    # plt.show()
 
 
 def evaluate_data(model, path_classes, path_to_sample):
@@ -160,9 +161,9 @@ def evaluate_data(model, path_classes, path_to_sample):
         draw_evaluation(sample_orig, single_class_orig, similarity)
         print(similarity)
 
-
-def show_positive_train(pairs, labels, marker):
+def show_positive_train(pairs, labels, marker, limit):
     num_labels = len(labels)
+    
     counter = 0
     for i in range(num_labels):
         if labels[i] == marker:
@@ -172,36 +173,6 @@ def show_positive_train(pairs, labels, marker):
             plt.figure(figsize=(4, 6))
             plt.title(f"{counter}.")
             plt.imshow(pair, cmap=plt.cm.gray)
-
-
-def get_config(key) -> int:
-    with open('./conf/config.yaml') as file:
-        file = yaml.load(file, Loader=yaml.FullLoader)
-
-    return file[key]
-
-
-if __name__ == '__main__':
-    config = get_config('CONFIG')
-    paths = get_config('PATHS')
-    print(config)
-    X, y = load_images(paths['BASE_PATH']+'train')
-    # print(X.shape)
-    # print(y.shape)
-
-    (X_train, y_train) = make_pairs(X, y)
-    # print(X_train.shape)
-    # print(y_train.shape)
-
-    # pairs_montage(X_train, y_train)
-    trainX = np.expand_dims(X, axis=-1)
-
-    (X_train, y_train) = make_pairs(trainX, y)
-    # print(len(X_train[:, 0]), len(X_train[:, 1]), len(y_train[:]))
-    DATA1, DATA2 = [X_train[:, 0], X_train[:, 1]], y_train[:]
-    print(len(DATA1[0]), len(DATA1[1]), len(DATA2[:]))
-    for i, x in enumerate(DATA1):
-        imshow(x[1])
-        imshow(x[2])
-        print(DATA2[i])
-    # break
+        
+        if counter > limit:
+            break
