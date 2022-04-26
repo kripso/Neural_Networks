@@ -1,4 +1,4 @@
-from enums import Intervals, Months
+from utils.enums import Intervals, Months
 from plotly import figure_factory
 from datetime import datetime
 
@@ -47,7 +47,7 @@ def get_stored_prices(interval=Intervals.fifteenMin, since=timeToTimeStamp(2017,
 
     dateTimeData = [timeStampToDateTime(data) for data in df.time]
     df["dateTime"] = dateTimeData
-    df = df.set_index(df.dateTime)
+    # df = df.set_index(df.dateTime)
 
     return df.loc[df['time'] > since]
 
